@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
+import org.tepi.filtertable.paged.PagedFilterControlConfig;
 import org.tepi.filtertable.paged.PagedFilterTable;
 import org.tepi.filtertable.paged.PagedFilterTableContainer;
 import org.tepi.filtertable.paged.PagedTableChangeEvent;
@@ -22,6 +23,7 @@ import com.vaadin.ui.Label;
 import com.vaadin.ui.TextField;
 import com.vaadin.ui.UI;
 import com.vaadin.ui.themes.Reindeer;
+
 import cz.cuni.mff.xrg.odcs.frontend.container.ReadOnlyContainer;
 
 /**
@@ -45,13 +47,17 @@ public class IntlibPagedTable extends PagedFilterTable {
         setFilterDecorator(new IntlibFilterDecorator());
     }
 
+    @Override
+    public HorizontalLayout createControls(PagedFilterControlConfig config) {
+    	return createControls();
+    }
+    
     /**
      * Creates controls for navigating between pages of table. Hides the page
      * size selector.
      * 
      * @return layout with table controls.
      */
-    @Override
     public HorizontalLayout createControls() {
 
         Label pageLabel = new Label("Page:&nbsp;", ContentMode.HTML);
