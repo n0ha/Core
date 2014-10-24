@@ -2,10 +2,8 @@ from SPARQLWrapper import SPARQLWrapper, JSON
 from SPARQLWrapper import XML, GET, POST, JSON, JSONLD, N3, TURTLE, RDF, SELECT, INSERT
 from SPARQLWrapper import URLENCODED, POSTDIRECTLY
 from SPARQLWrapper.Wrapper import QueryResult, QueryBadFormed, EndPointNotFound, EndPointInternalError
-from collections import Counter
-import json
-import urllib2
-import urllib
+from JSON_dataset import JSON_Dataset
+from uploader import Uploader
 import pprint
 
 from slugify import slugify
@@ -23,93 +21,6 @@ EXTRAS_ATTRIBUTES = [ "dataset", \
 "void#dataDump"
 ]
 
-
-class JSON_Dataset():
-    def __init__(self):
-        self.name = ''
-        self.title = ''
-        self.notes = ''
-        self.author = ''
-        self.extras = []
-        self.resources = []
-        self.license = 'cc-by'
-   
-    def tostring(self):
-        return   "[%s] name: [%s] title: [%s] notes: [%s] author: [%s] extras: [%s] resource: [%s]" % (self.__class__.__name__, self.name, self.title , self.notes , self.author, self.extras, self.resources)  
-        
-    def tojson_without_resource(self):
-        return { "name" : str(self.name), "title" :  str(self.title), "notes": str(self.notes), "author": self.author, "extras": self.extras , "license_id"  : self.license}
-    
-    def tojson_all(self):
-        return { "name" : str(self.name), "title" :  str(self.title), "notes": str(self.notes), "author": self.author, "extras": self.extras , "license_id"  : self.license, "resources" : self.resources}
-
-    def tojson_resource(self):
-        if len(self.resources) > 0:
-            result = self.resources[0]
-        else:
-            result = { }
-            
-        return result
-    
-    def __str__(self):
-        return str(self.tostring())
-
-
-class Uploader(): 
-    def __init__(self, url, api_key):
-        self.url = url
-        self.api_key = api_key
-        
-        
-    def send_request(self, data_string, url):
-        request = urllib2.Request(url)
-        # Creating a dataset requires an authorization header.
-        request.add_header('Authorization', self.api_key)
-        # Make the HTTP request.
-        response = urllib2.urlopen(request, data_string)
-        assert response.code == 200
-        # Use the json module to load CKAN's response into a dictionary.
-        response_dict = json.loads(response.read())
-        assert response_dict['success'] is True
-        # package_create returns the created package as its result.
-        created_package = response_dict['result']
-        return created_package
-    
-    
-    def package_update_resource(self, dataset):
-        dataset_dict = dataset.tojson_all()
-        data_string = urllib.quote(json.dumps(dataset_dict))
-        url = self.url + "/api/action/package_update"
-        self.send_request(data_string, url)
-        
-     
-    def create_resource(self, dataset):
-        resources = dataset.resources[0]
-        data_string = urllib.quote(json.dumps(resources))
-        url = self.url + "/api/action/resource_create"
-        self.send_request(data_string, url)
-
-
-    def create_dataset(self, dataset):
-        dataset_dict = dataset.tojson_without_resource()
-        data_string = urllib.quote(json.dumps(dataset_dict))
-        url = self.url + "/api/action/package_create"
-        self.send_request(data_string, url)
-        
-
-    def package_search(self, dataset):
-        dataset_dict = {}
-        dataset_dict['q'] = 'name:' + dataset.name
-        data_string = urllib.quote(json.dumps(dataset_dict))
-        url = self.url + "/api/action/package_search"
-        result = self.send_request(data_string, url)        
-        if result['count'] > 0:
-            found = True
-        else:
-            found = False
-            
-        return found
-        
 
 class SparqlEndpoint():
     def __init__(self):
@@ -184,12 +95,21 @@ def main():
     sparqlParser = SparqlEndpoint();
     datasets = sparqlParser.read();
     uploader = Uploader(url='http://192.168.59.103', api_key='6afaea8d-48a4-438a-a55d-13c80428984a')
+#    for dataset in datasets:
+#        found = uploader.package_search(dataset)
+#        if found:
+#            uploader.package_update(dataset)
+#        else:
+#            uploader.create_package(dataset)
+        
+        
     for dataset in datasets:
-        found = uploader.package_search(dataset)
+        found, resource_id = uploader.search_resource(dataset)
+        
         if found:
-            uploader.package_update_resource(dataset)
+            uploader.resource_update(dataset, resource_id)
         else:
-            uploader.create_dataset(dataset)
+            uploader.create_resource(dataset)
         
     
     
