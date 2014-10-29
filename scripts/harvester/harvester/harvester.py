@@ -5,9 +5,10 @@ from SPARQLWrapper.Wrapper import QueryResult, QueryBadFormed, EndPointNotFound,
 from JSON_dataset import JSON_Dataset
 from uploader import Uploader
 import pprint
-
+import sys
 from slugify import slugify
-from numpy.core.defchararray import rfind
+import datetime
+import argparse
 
 EXTRAS_ATTRIBUTES = [ "dataset", \
 "publisher", \
@@ -23,12 +24,12 @@ EXTRAS_ATTRIBUTES = [ "dataset", \
 
 
 class SparqlEndpoint():
-    def __init__(self):
-        pass
+    def __init__(self, url):
+        self.url = url
 
      
     def read(self):
-        self.wrapper = SPARQLWrapper(endpoint="http://192.168.128.22:8890/sparql")
+        self.wrapper = SPARQLWrapper(endpoint=self.url)
         self.wrapper.setQuery('SELECT  *  WHERE {?s a void:Dataset}')
         self.wrapper.setReturnFormat(JSON)
         results = self.wrapper.query().convert()
@@ -91,29 +92,35 @@ class SparqlEndpoint():
 
 
 
-def main():
-    sparqlParser = SparqlEndpoint();
+def main(argv):
+    parser = argparse.ArgumentParser(description="The script reads datasets from VirtuosoEndpoint and updates CKAN's packages and resources.")
+    parser.add_argument('-c', '--ckan', help='Host url e.g. http://192.168.128.22', required=True)
+    parser.add_argument('-k', '--key', help="Ckan user's API key", required=True)
+    parser.add_argument('-s', '--sparql', help="Sparql endpoint", required=True)
+
+    args = parser.parse_args()
+    print "start " + str(datetime.datetime.now())
+    sparqlParser = SparqlEndpoint(url=args.sparql);
     datasets = sparqlParser.read();
-    uploader = Uploader(url='http://192.168.59.103', api_key='6afaea8d-48a4-438a-a55d-13c80428984a')
-#    for dataset in datasets:
-#        found = uploader.package_search(dataset)
-#        if found:
-#            uploader.package_update(dataset)
-#        else:
-#            uploader.create_package(dataset)
-        
-        
+    uploader = Uploader(url=args.ckan, api_key=args.key)
+
     for dataset in datasets:
-        found, resource_id = uploader.search_resource(dataset)
-        
+        found = uploader.package_search(dataset)
         if found:
-            uploader.resource_update(dataset, resource_id)
-        else:
+            package_has_changed = uploader.change_happend(dataset)
+            if package_has_changed:
+                uploader.package_update(dataset)
+                uploader.create_or_update_resouce(dataset)
+            
+    
+        if not found:
+            uploader.create_package(dataset)
             uploader.create_resource(dataset)
-        
+
+    print "end successfully " + str(datetime.datetime.now())
     
     
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
 
         
