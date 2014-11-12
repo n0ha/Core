@@ -46,7 +46,7 @@
 
     <inherits name="org.tepi.filtertable.gwt.FilterTableWidgetset"/>
 
-    <inherits name="com.github.wolfie.refresher.RefresherWidgetset"/>
+    
 
 
 

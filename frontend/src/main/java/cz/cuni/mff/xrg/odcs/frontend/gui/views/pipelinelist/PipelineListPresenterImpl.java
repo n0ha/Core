@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import org.tepi.filtertable.numberfilter.NumberInterval;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import com.github.wolfie.refresher.Refresher;
 import com.vaadin.server.Page;
 import com.vaadin.ui.Notification;
 import com.vaadin.ui.UI;
@@ -32,14 +31,13 @@ import cz.cuni.mff.xrg.odcs.commons.app.pipeline.transfer.ImportService;
 import cz.cuni.mff.xrg.odcs.commons.app.scheduling.Schedule;
 import cz.cuni.mff.xrg.odcs.frontend.AppEntry;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.PipelineHelper;
-import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.RefreshManager;
 import cz.cuni.mff.xrg.odcs.frontend.container.ReadOnlyContainer;
 import cz.cuni.mff.xrg.odcs.frontend.container.accessor.PipelineAccessor;
 import cz.cuni.mff.xrg.odcs.frontend.doa.container.db.DbCachedSource;
 import cz.cuni.mff.xrg.odcs.frontend.gui.components.SchedulePipeline;
 import cz.cuni.mff.xrg.odcs.frontend.gui.dialog.PipelineImport;
-import cz.cuni.mff.xrg.odcs.frontend.gui.views.PostLogoutCleaner;
 import cz.cuni.mff.xrg.odcs.frontend.gui.views.PipelineEdit;
+import cz.cuni.mff.xrg.odcs.frontend.gui.views.PostLogoutCleaner;
 import cz.cuni.mff.xrg.odcs.frontend.gui.views.Utils;
 import cz.cuni.mff.xrg.odcs.frontend.gui.views.executionlist.ExecutionListPresenterImpl;
 import cz.cuni.mff.xrg.odcs.frontend.navigation.Address;
@@ -48,7 +46,7 @@ import cz.cuni.mff.xrg.odcs.frontend.navigation.ParametersHandler;
 
 /**
  * Implementation of {@link PipelineListPresenter}.
- * 
+ *
  * @author Bogo
  */
 @Component
@@ -91,7 +89,7 @@ public class PipelineListPresenterImpl implements PipelineListPresenter, PostLog
 
     private DbCachedSource<Pipeline> cachedSource;
 
-    private RefreshManager refreshManager;
+//    private RefreshManager refreshManager;
 
     private Date lastLoad = new Date(0L);
 
@@ -100,17 +98,17 @@ public class PipelineListPresenterImpl implements PipelineListPresenter, PostLog
      */
     @Autowired
     private AuthAwarePermissionEvaluator permissions;
-    
+
     private boolean isInitialized = false;
 
     @Override
     public Object enter() {
-    	if (isInitialized) {
-    		navigator = ((AppEntry) UI.getCurrent()).getNavigation();
-    		addRefreshManager();
-			return view.enter(this);
-		}
-    	
+        if (isInitialized) {
+            navigator = ((AppEntry) UI.getCurrent()).getNavigation();
+//            addRefreshManager();
+            return view.enter(this);
+        }
+
         navigator = ((AppEntry) UI.getCurrent()).getNavigation();
         // prepare data object
         cachedSource = new DbCachedSource<>(dbPipeline, pipelineAccessor, utils.getPageLength());
@@ -118,7 +116,7 @@ public class PipelineListPresenterImpl implements PipelineListPresenter, PostLog
 
         // prepare view
         Object viewObject = view.enter(this);
-        addRefreshManager();
+//        addRefreshManager();
 
         // set data object
         view.setDisplay(dataObject);
@@ -127,36 +125,36 @@ public class PipelineListPresenterImpl implements PipelineListPresenter, PostLog
         view.setFilter("owner.username", utils.getUserName());
 
         isInitialized = true;
-        
+
         // return main component
         return viewObject;
     }
 
-    private void addRefreshManager() {
-    	refreshManager = ((AppEntry) UI.getCurrent()).getRefreshManager();
-        refreshManager.addListener(RefreshManager.PIPELINE_LIST, new Refresher.RefreshListener() {
-            private long lastRefreshFinished = 0;
+//    private void addRefreshManager() {
+//    	refreshManager = ((AppEntry) UI.getCurrent()).getRefreshManager();
+//        refreshManager.addListener(RefreshManager.PIPELINE_LIST, new Refresher.RefreshListener() {
+//            private long lastRefreshFinished = 0;
+//
+//            @Override
+//            public void refresh(Refresher source) {
+//                if (new Date().getTime() - lastRefreshFinished > RefreshManager.MIN_REFRESH_INTERVAL) {
+//                    boolean hasModifiedPipelinesOrExecutions = pipelineFacade.hasModifiedPipelines(lastLoad)
+//                    		|| pipelineFacade.hasModifiedExecutions(lastLoad)
+//                    		|| (cachedSource.size() > 0 &&
+//                    		   pipelineFacade.hasDeletedPipelines((List<Long>) cachedSource.getItemIds(0, cachedSource.size())));
+//                    if (hasModifiedPipelinesOrExecutions) {
+//                        lastLoad = new Date();
+//                        refreshEventHandler();
+//                    }
+//                    LOG.debug("Pipeline list refreshed.");
+//                    lastRefreshFinished = new Date().getTime();
+//                }
+//            }
+//        });
+//        refreshManager.triggerRefresh();
+//	}
 
-            @Override
-            public void refresh(Refresher source) {
-                if (new Date().getTime() - lastRefreshFinished > RefreshManager.MIN_REFRESH_INTERVAL) {
-                    boolean hasModifiedPipelinesOrExecutions = pipelineFacade.hasModifiedPipelines(lastLoad) 
-                    		|| pipelineFacade.hasModifiedExecutions(lastLoad)
-                    		|| (cachedSource.size() > 0 &&
-                    		   pipelineFacade.hasDeletedPipelines((List<Long>) cachedSource.getItemIds(0, cachedSource.size())));
-                    if (hasModifiedPipelinesOrExecutions) {
-                        lastLoad = new Date();
-                        refreshEventHandler();
-                    }
-                    LOG.debug("Pipeline list refreshed.");
-                    lastRefreshFinished = new Date().getTime();
-                }
-            }
-        });
-        refreshManager.triggerRefresh();
-	}
-
-	@Override
+    @Override
     public void setParameters(Object configuration) {
         if (configuration != null && Map.class.isAssignableFrom(configuration.getClass())) {
             int pageNumber = 0;
@@ -322,14 +320,14 @@ public class PipelineListPresenterImpl implements PipelineListPresenter, PostLog
         dialog.bringToFront();
     }
 
-	@Override
-	public void doAfterLogout() {
-		isInitialized = false;
-	}
+    @Override
+    public void doAfterLogout() {
+        isInitialized = false;
+    }
 
-	@Override
-	public boolean isLayoutInitialized() {
-		return isInitialized;
-	}
+    @Override
+    public boolean isLayoutInitialized() {
+        return isInitialized;
+    }
 
 }

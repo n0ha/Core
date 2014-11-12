@@ -1,11 +1,5 @@
 package cz.cuni.mff.xrg.odcs.frontend.gui.views;
 
-import static cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecutionStatus.QUEUED;
-import static cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecutionStatus.RUNNING;
-
-import java.util.Date;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +8,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.security.access.AccessDeniedException;
 import org.vaadin.dialogs.ConfirmDialog;
 
-import com.github.wolfie.refresher.Refresher;
 import com.vaadin.data.Property;
 import com.vaadin.data.Validator;
 import com.vaadin.data.util.ObjectProperty;
@@ -49,7 +42,6 @@ import cz.cuni.mff.xrg.odcs.commons.app.dpu.DPUInstanceRecord;
 import cz.cuni.mff.xrg.odcs.commons.app.dpu.DPUTemplateRecord;
 import cz.cuni.mff.xrg.odcs.commons.app.facade.DPUFacade;
 import cz.cuni.mff.xrg.odcs.commons.app.facade.PipelineFacade;
-import cz.cuni.mff.xrg.odcs.commons.app.pipeline.OpenEvent;
 import cz.cuni.mff.xrg.odcs.commons.app.pipeline.Pipeline;
 import cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecution;
 import cz.cuni.mff.xrg.odcs.commons.app.pipeline.graph.Edge;
@@ -60,7 +52,6 @@ import cz.cuni.mff.xrg.odcs.commons.app.user.Role;
 import cz.cuni.mff.xrg.odcs.frontend.AppEntry;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.MaxLengthValidator;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.PipelineHelper;
-import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.RefreshManager;
 import cz.cuni.mff.xrg.odcs.frontend.gui.ViewComponent;
 import cz.cuni.mff.xrg.odcs.frontend.gui.components.DPUTree;
 import cz.cuni.mff.xrg.odcs.frontend.gui.components.DebuggingView;
@@ -77,7 +68,7 @@ import cz.cuni.mff.xrg.odcs.frontend.navigation.Address;
 
 /**
  * Page for creating new pipeline or editing existing pipeline.
- * 
+ *
  * @author Bogo
  */
 @org.springframework.stereotype.Component
@@ -179,7 +170,7 @@ public class PipelineEdit extends ViewComponent {
     @Autowired
     private DPUFacade dpuFacade;
 
-    private RefreshManager refreshManager;
+//    private RefreshManager refreshManager;
 
     @Autowired
     private PipelineHelper pipelineHelper;
@@ -216,13 +207,13 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Enter method for PIPELINE_EDIT view.
-     * 
+     *
      * @param event
      *            {@link ViewChangeEvent}
      */
     @Override
     public void enter(ViewChangeEvent event) {
-        refreshManager = ((AppEntry) UI.getCurrent()).getRefreshManager();
+//        refreshManager = ((AppEntry) UI.getCurrent()).getRefreshManager();
         buildMainLayout();
         UI.getCurrent().getPage().addBrowserWindowResizeListener(new Page.BrowserWindowResizeListener() {
 
@@ -237,47 +228,47 @@ public class PipelineEdit extends ViewComponent {
         // or use this.entity.getEntity();
 
         if (this.pipeline == null) {
-        	return;
+            return;
         } else {
             setMode(hasPermission("save"));
             updateLblPipelineName();
         }
 
-        refreshManager.addListener(RefreshManager.PIPELINE_EDIT, new Refresher.RefreshListener() {
-
-            private long lastRefreshFinished = 0;
-
-            @Override
-            public void refresh(Refresher source) {
-                if (pipeline != null && new Date().getTime() - lastRefreshFinished > RefreshManager.MIN_REFRESH_INTERVAL) {
-                    pipelineFacade.createOpenEvent(pipeline);
-                    List<OpenEvent> openEvents = pipelineFacade.getOpenPipelineEvents(pipeline);
-                    if (!pipelineFacade.isUpToDate(pipeline)) {
-                        editConflicts.setValue("Another user made changes to the version you are editing, please refresh the pipeline detail!");
-                        paralelInfoLayout.setVisible(true);
-                        buttonRefresh.setVisible(true);
-                    } else if (openEvents.isEmpty()) {
-                        paralelInfoLayout.setVisible(false);
-                    } else {
-                        String message;
-                        if (openEvents.size() == 1) {
-                            message = String.format("User %s is also browsing this pipeline.", openEvents.get(0).getUser().getUsername());
-                        } else {
-                            String userList = "";
-                            for (OpenEvent openEvent : openEvents) {
-                                userList += String.format("%s %s", openEvents.indexOf(openEvent) == 0 ? "" : ",", openEvent.getUser().getUsername());
-                            }
-                            message = String.format("Users %s are also browsing this pipeline.", userList);
-                        }
-                        editConflicts.setValue(message);
-                        paralelInfoLayout.setVisible(true);
-                        buttonRefresh.setVisible(false);
-                    }
-                    lastRefreshFinished = new Date().getTime();
-                }
-                LOG.debug("Open pipelines checked.");
-            }
-        });
+//        refreshManager.addListener(RefreshManager.PIPELINE_EDIT, new Refresher.RefreshListener() {
+//
+//            private long lastRefreshFinished = 0;
+//
+//            @Override
+//            public void refresh(Refresher source) {
+//                if (pipeline != null && new Date().getTime() - lastRefreshFinished > RefreshManager.MIN_REFRESH_INTERVAL) {
+//                    pipelineFacade.createOpenEvent(pipeline);
+//                    List<OpenEvent> openEvents = pipelineFacade.getOpenPipelineEvents(pipeline);
+//                    if (!pipelineFacade.isUpToDate(pipeline)) {
+//                        editConflicts.setValue("Another user made changes to the version you are editing, please refresh the pipeline detail!");
+//                        paralelInfoLayout.setVisible(true);
+//                        buttonRefresh.setVisible(true);
+//                    } else if (openEvents.isEmpty()) {
+//                        paralelInfoLayout.setVisible(false);
+//                    } else {
+//                        String message;
+//                        if (openEvents.size() == 1) {
+//                            message = String.format("User %s is also browsing this pipeline.", openEvents.get(0).getUser().getUsername());
+//                        } else {
+//                            String userList = "";
+//                            for (OpenEvent openEvent : openEvents) {
+//                                userList += String.format("%s %s", openEvents.indexOf(openEvent) == 0 ? "" : ",", openEvent.getUser().getUsername());
+//                            }
+//                            message = String.format("Users %s are also browsing this pipeline.", userList);
+//                        }
+//                        editConflicts.setValue(message);
+//                        paralelInfoLayout.setVisible(true);
+//                        buttonRefresh.setVisible(false);
+//                    }
+//                    lastRefreshFinished = new Date().getTime();
+//                }
+//                LOG.debug("Open pipelines checked.");
+//            }
+//        });
 
         //Resizing canvas
         UI.getCurrent().setImmediate(true);
@@ -285,7 +276,7 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Builds main layout of the page.
-     * 
+     *
      * @return {@link VerticalLayout} is the main layout of the view.
      */
     private VerticalLayout buildMainLayout() {
@@ -457,7 +448,7 @@ public class PipelineEdit extends ViewComponent {
                 if (canvasMode.equals(STANDARD_MODE)) {
                     return;
                 }
-                Transferable t = (Transferable) event.getTransferable();
+                Transferable t = event.getTransferable();
                 DragAndDropWrapper.WrapperTargetDetails details = (DragAndDropWrapper.WrapperTargetDetails) event.getTargetDetails();
                 MouseEventDetails mouse = details.getMouseEvent();
 
@@ -825,7 +816,7 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Check for permission.
-     * 
+     *
      * @param type
      *            Required permission.
      * @return If the user has given permission
@@ -844,7 +835,7 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Builds part of layout with pipeline settings.
-     * 
+     *
      * @return {@link GridLayout} contains controls with information about
      *         pipeline settings.
      * @throws com.vaadin.ui.GridLayout.OverlapsException
@@ -975,7 +966,7 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Return true if given string is positive number.
-     * 
+     *
      * @param str
      *            {@link String} to check
      * @return True if given string is positive number, false otherwise.
@@ -1016,7 +1007,7 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Opens given {@link DebuggingView} in new window.
-     * 
+     *
      * @param debug
      *            {@link DebuggingView} to show.
      */
@@ -1067,12 +1058,12 @@ public class PipelineEdit extends ViewComponent {
         debugWindow.setImmediate(true);
         debugWindow.setWidth("700px");
         debugWindow.setHeight("850px");
-        debugWindow.addCloseListener(new Window.CloseListener() {
-            @Override
-            public void windowClose(Window.CloseEvent e) {
-                refreshManager.removeListener(RefreshManager.DEBUGGINGVIEW);
-            }
-        });
+//        debugWindow.addCloseListener(new Window.CloseListener() {
+//            @Override
+//            public void windowClose(Window.CloseEvent e) {
+////                refreshManager.removeListener(RefreshManager.DEBUGGINGVIEW);
+//            }
+//        });
         debugWindow.addResizeListener(new Window.ResizeListener() {
             @Override
             public void windowResized(Window.ResizeEvent e) {
@@ -1080,33 +1071,33 @@ public class PipelineEdit extends ViewComponent {
             }
         });
 
-        if (pExec.getStatus() == RUNNING || pExec.getStatus() == QUEUED) {
-            refreshManager.addListener(RefreshManager.DEBUGGINGVIEW, RefreshManager.getDebugRefresher(debug, pExec, pipelineFacade));
-        }
+//        if (pExec.getStatus() == RUNNING || pExec.getStatus() == QUEUED) {
+//            refreshManager.addListener(RefreshManager.DEBUGGINGVIEW, RefreshManager.getDebugRefresher(debug, pExec, pipelineFacade));
+//        }
         UI.getCurrent().addWindow(debugWindow);
     }
 
     /**
      * Loads pipeline with given id from database.
-     * 
+     *
      * @param id
      *            {@link String} with id of {@link Pipeline} to load
      * @return {@link Pipeline} with given id.
      */
     protected Pipeline loadPipeline(String id) {
         // get data from DB ..
-    	try {
-    		this.pipeline = pipelineFacade.getPipeline(Long.parseLong(id));
-		} catch (AccessDeniedException e) {
-			Notification.show("Error opening pipeline detail.", "You don't have permission to view this pipeline", Type.ERROR_MESSAGE);
-			closeView();
-			return null;
-		}
+        try {
+            this.pipeline = pipelineFacade.getPipeline(Long.parseLong(id));
+        } catch (AccessDeniedException e) {
+            Notification.show("Error opening pipeline detail.", "You don't have permission to view this pipeline", Type.ERROR_MESSAGE);
+            closeView();
+            return null;
+        }
         if (this.pipeline == null) {
-        	Notification.show("Error opening pipeline detail.", "Pipeline doesn't exist.", Type.ERROR_MESSAGE);
-        	closeView();
-			return null;
-		}
+            Notification.show("Error opening pipeline detail.", "Pipeline doesn't exist.", Type.ERROR_MESSAGE);
+            closeView();
+            return null;
+        }
         setIdLabel(pipeline.getId());
         author.setValue(pipeline.getOwner().getUsername());
         pipelineName.setPropertyDataSource(new ObjectProperty<>(this.pipeline.getName()));
@@ -1121,7 +1112,7 @@ public class PipelineEdit extends ViewComponent {
      * Loads pipeline to edit or create. Pipeline entity is loaded into
      * this.entity. If /New parameter is passed in url, create just
      * representation for pipeline.
-     * 
+     *
      * @param event
      *            {@link ViewChangeEvent} passed from enter method.
      * @return Loaded pipeline class instance or null.
@@ -1158,7 +1149,7 @@ public class PipelineEdit extends ViewComponent {
 
     /**
      * Saves current pipeline.
-     * 
+     *
      * @param successAction
      * @return If current pipeline was saved
      */
@@ -1246,7 +1237,7 @@ public class PipelineEdit extends ViewComponent {
     /**
      * Calculates and sets canvas dimensions according to current size of
      * browser window and pipeline graph's bounds.
-     * 
+     *
      * @param zoomBounds
      *            {@link Position} with bounds of pipeline graph.
      */
@@ -1270,7 +1261,7 @@ public class PipelineEdit extends ViewComponent {
     /**
      * Validates fields with requirements on input. Shows errors as
      * notification.
-     * 
+     *
      * @return validation result
      */
     private boolean validate() {

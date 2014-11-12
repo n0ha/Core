@@ -15,21 +15,15 @@ import org.vaadin.dialogs.ConfirmDialog;
 
 import ru.xpoft.vaadin.VaadinView;
 
-import com.github.wolfie.refresher.Refresher;
 import com.vaadin.data.Property;
 import com.vaadin.data.util.IndexedContainer;
 import com.vaadin.event.ItemClickEvent;
 import com.vaadin.navigator.ViewChangeListener.ViewChangeEvent;
 import com.vaadin.server.Resource;
 import com.vaadin.server.ThemeResource;
-import com.vaadin.ui.Button;
+import com.vaadin.ui.*;
 import com.vaadin.ui.Button.ClickEvent;
 import com.vaadin.ui.Button.ClickListener;
-import com.vaadin.ui.CustomTable;
-import com.vaadin.ui.Embedded;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window.CloseListener;
 
@@ -40,9 +34,7 @@ import cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecution;
 import cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecutionStatus;
 import cz.cuni.mff.xrg.odcs.commons.app.scheduling.Schedule;
 import cz.cuni.mff.xrg.odcs.commons.app.scheduling.ScheduleType;
-import cz.cuni.mff.xrg.odcs.frontend.AppEntry;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.DecorationHelper;
-import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.RefreshManager;
 import cz.cuni.mff.xrg.odcs.frontend.gui.ViewComponent;
 import cz.cuni.mff.xrg.odcs.frontend.gui.components.SchedulePipeline;
 import cz.cuni.mff.xrg.odcs.frontend.gui.tables.IntlibFilterDecorator;
@@ -52,7 +44,7 @@ import cz.cuni.mff.xrg.odcs.frontend.navigation.Address;
 /**
  * GUI for Scheduler page which opens from the main menu. Contains table with
  * scheduler rules and button for scheduler rule creation.
- * 
+ *
  * @author Maria Kukhar
  */
 @org.springframework.stereotype.Component
@@ -103,7 +95,7 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
 
     private Date lastLoad = new Date(0L);
 
-    private RefreshManager refreshManager;
+//    private RefreshManager refreshManager;
 
     @Autowired
     private SchedulePipeline schedulePipeline;
@@ -120,7 +112,7 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
     private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
 
     private boolean isMainLayoutInitialized = false;
-    
+
     /**
      * The constructor should first build the main layout, set the composition
      * root and then do any custom initialization.
@@ -138,35 +130,35 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
 
     @Override
     public void enter(ViewChangeEvent event) {
-    	if (!isMainLayoutInitialized) {
-    		buildMainLayout();
-    		isMainLayoutInitialized = true;
-		}
+        if (!isMainLayoutInitialized) {
+            buildMainLayout();
+            isMainLayoutInitialized = true;
+        }
         setCompositionRoot(mainLayout);
 
-        refreshManager = ((AppEntry) UI.getCurrent()).getRefreshManager();
-        refreshManager.addListener(RefreshManager.SCHEDULER, new Refresher.RefreshListener() {
-            private long lastRefreshFinished = 0;
-
-            @Override
-            public void refresh(Refresher source) {
-                if (new Date().getTime() - lastRefreshFinished > RefreshManager.MIN_REFRESH_INTERVAL) {
-                    boolean hasModifiedExecutions = pipelineFacade.hasModifiedExecutions(lastLoad);
-                    if (hasModifiedExecutions) {
-                        lastLoad = new Date();
-                        refreshData();
-                    }
-                    LOG.debug("Scheduler refreshed.");
-                    lastRefreshFinished = new Date().getTime();
-                }
-            }
-        });
-        refreshManager.triggerRefresh();
+//        refreshManager = ((AppEntry) UI.getCurrent()).getRefreshManager();
+//        refreshManager.addListener(RefreshManager.SCHEDULER, new Refresher.RefreshListener() {
+//            private long lastRefreshFinished = 0;
+//
+//            @Override
+//            public void refresh(Refresher source) {
+//                if (new Date().getTime() - lastRefreshFinished > RefreshManager.MIN_REFRESH_INTERVAL) {
+//                    boolean hasModifiedExecutions = pipelineFacade.hasModifiedExecutions(lastLoad);
+//                    if (hasModifiedExecutions) {
+//                        lastLoad = new Date();
+//                        refreshData();
+//                    }
+//                    LOG.debug("Scheduler refreshed.");
+//                    lastRefreshFinished = new Date().getTime();
+//                }
+//            }
+//        });
+//        refreshManager.triggerRefresh();
     }
 
     /**
      * Builds main layout contains table with created scheduling pipeline rules.
-     * 
+     *
      * @return mainLayout VerticalLayout with all components of Scheduler page.
      */
     private VerticalLayout buildMainLayout() {
@@ -286,7 +278,7 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
 
     /**
      * Container with data for table {@link #schedulerTable}.
-     * 
+     *
      * @param data
      *            List of {@link Schedule}.
      * @return result IndexedContainer with data for {@link #schedulerTable}.
@@ -340,7 +332,7 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
                     result.getContainerProperty(id, "rule").setValue(
                             "Run on " + df.format(item.getFirstExecution()));
                 } else {
-                    if (item.getPeriod().equals((Integer) 1)) {
+                    if (item.getPeriod().equals(1)) {
                         result.getContainerProperty(id, "rule").setValue(
                                 "Run on "
                                         + df.format(item.getFirstExecution())
@@ -417,7 +409,7 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
 
     /**
      * Shows dialog for scheduling pipeline with given scheduling rule.
-     * 
+     *
      * @param id
      *            Id of schedule to show.
      */
@@ -447,7 +439,7 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
 
     /**
      * Generate column "commands" in the table {@link #schedulerTable}.
-     * 
+     *
      * @author Maria Kukhar
      */
     class actionColumnGenerator implements CustomTable.ColumnGenerator {
@@ -567,8 +559,8 @@ public class Scheduler extends ViewComponent implements PostLogoutCleaner {
         }
     }
 
-	@Override
-	public void doAfterLogout() {
-		isMainLayoutInitialized = false;
-	}
+    @Override
+    public void doAfterLogout() {
+        isMainLayoutInitialized = false;
+    }
 }

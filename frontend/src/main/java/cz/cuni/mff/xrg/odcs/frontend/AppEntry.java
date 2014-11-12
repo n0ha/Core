@@ -11,7 +11,6 @@ import org.vaadin.dialogs.DefaultConfirmDialogFactory;
 
 import virtuoso.jdbc4.VirtuosoException;
 
-import com.github.wolfie.refresher.Refresher;
 import com.vaadin.annotations.Theme;
 import com.vaadin.navigator.ViewChangeListener;
 import com.vaadin.server.DefaultErrorHandler;
@@ -27,7 +26,6 @@ import com.vaadin.ui.Notification.Type;
 import cz.cuni.mff.xrg.odcs.commons.app.auth.AuthenticationContext;
 import cz.cuni.mff.xrg.odcs.frontend.auth.AuthenticationService;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.DecorationHelper;
-import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.RefreshManager;
 import cz.cuni.mff.xrg.odcs.frontend.gui.MenuLayout;
 import cz.cuni.mff.xrg.odcs.frontend.gui.ModifiableComponent;
 import cz.cuni.mff.xrg.odcs.frontend.gui.views.Initial;
@@ -41,7 +39,7 @@ import cz.cuni.mff.xrg.odcs.frontend.navigation.ClassNavigatorImpl;
  * Frontend application entry point. Also provide access to the application
  * services like database connection. To access the class use
  * ((AppEntry)UI.getCurrent()).
- * 
+ *
  * @author Petyr
  */
 @Theme("UnifiedViewsTheme")
@@ -58,7 +56,7 @@ public class AppEntry extends com.vaadin.ui.UI {
     @Autowired
     private ClassNavigatorHolder navigatorHolder;
 
-    private RefreshManager refreshManager;
+//    private RefreshManager refreshManager;
 
     private String storedNavigation = null;
 
@@ -85,7 +83,7 @@ public class AppEntry extends com.vaadin.ui.UI {
         // create a navigator to control the views
         // and set it into the navigator holder
         ClassNavigatorImpl navInstance = new ClassNavigatorImpl(this, main.getViewLayout(), context);
-        ((ClassNavigatorHolder) navigatorHolder).setNavigator(navInstance);
+        navigatorHolder.setNavigator(navInstance);
         main.setNavigation(navigatorHolder);
 
         ConfirmDialog.Factory df = new DefaultConfirmDialogFactory() {
@@ -101,7 +99,7 @@ public class AppEntry extends com.vaadin.ui.UI {
                         d.getWidthUnits(), d.getHeight(), d.getHeightUnits(),
                         caption != null ? caption.length() : 0);
 
-                // we inceare by 1.5 .. so prevent from creating 
+                // we inceare by 1.5 .. so prevent from creating
                 // unecesary scroll bars on some resolutions and zoom levels
                 // also it should not do somehing bad as at the end the dialog
                 // is just litle bit heigher then originally
@@ -160,7 +158,7 @@ public class AppEntry extends com.vaadin.ui.UI {
             public boolean beforeViewChange(ViewChangeListener.ViewChangeEvent event) {
                 main.refreshUserBar();
 
-                // TODO adjust this once Login screen will be presenters 
+                // TODO adjust this once Login screen will be presenters
                 //	to event.getNewView().equals(Login.class)
                 if (!(event.getNewView() instanceof Login)
                         && !authCtx.isAuthenticated()
@@ -177,11 +175,11 @@ public class AppEntry extends com.vaadin.ui.UI {
                 }
                 setNavigationHistory(event);
 
-                refreshManager.removeListener(RefreshManager.EXECUTION_MONITOR);
-                refreshManager.removeListener(RefreshManager.DEBUGGINGVIEW);
-                refreshManager.removeListener(RefreshManager.PIPELINE_LIST);
-                refreshManager.removeListener(RefreshManager.SCHEDULER);
-                refreshManager.removeListener(RefreshManager.PIPELINE_EDIT);
+//                refreshManager.removeListener(RefreshManager.EXECUTION_MONITOR);
+//                refreshManager.removeListener(RefreshManager.DEBUGGINGVIEW);
+//                refreshManager.removeListener(RefreshManager.PIPELINE_LIST);
+//                refreshManager.removeListener(RefreshManager.SCHEDULER);
+//                refreshManager.removeListener(RefreshManager.PIPELINE_EDIT);
 
                 return true;
             }
@@ -248,23 +246,23 @@ public class AppEntry extends com.vaadin.ui.UI {
             }
         });
 
-        Refresher refresher = new Refresher();
-        refresher.setRefreshInterval(RefreshManager.REFRESH_INTERVAL);
-        addExtension(refresher);
-        refreshManager = new RefreshManager(refresher);
-        refreshManager.addListener(RefreshManager.BACKEND_STATUS,
-                new Refresher.RefreshListener() {
-                    private boolean lastBackendStatus = false;
-
-                    @Override
-                    public void refresh(Refresher source) {
-                        boolean isRunning = heartbeatService.checkIsAlive();
-                        if (lastBackendStatus != isRunning) {
-                            lastBackendStatus = isRunning;
-                            main.refreshBackendStatus(lastBackendStatus);
-                        }
-                    }
-                });
+//        Refresher refresher = new Refresher();
+//        refresher.setRefreshInterval(RefreshManager.REFRESH_INTERVAL);
+//        addExtension(refresher);
+//        refreshManager = new RefreshManager(refresher);
+//        refreshManager.addListener(RefreshManager.BACKEND_STATUS,
+//                new Refresher.RefreshListener() {
+//                    private boolean lastBackendStatus = false;
+//
+//                    @Override
+//                    public void refresh(Refresher source) {
+//                        boolean isRunning = heartbeatService.checkIsAlive();
+//                        if (lastBackendStatus != isRunning) {
+//                            lastBackendStatus = isRunning;
+//                            main.refreshBackendStatus(lastBackendStatus);
+//                        }
+//                    }
+//                });
     }
 
     /**
@@ -302,7 +300,7 @@ public class AppEntry extends com.vaadin.ui.UI {
 
     /**
      * Get current navigation.
-     * 
+     *
      * @return Navigator.
      */
     public ClassNavigator getNavigation() {
@@ -311,7 +309,7 @@ public class AppEntry extends com.vaadin.ui.UI {
 
     /**
      * Fetches spring bean. For cases when auto-wiring is not a possibility.
-     * 
+     *
      * @param <T>
      * @param type
      *            Class of the bean to fetch.
@@ -320,10 +318,10 @@ public class AppEntry extends com.vaadin.ui.UI {
     public <T extends Object> T getBean(Class<T> type) {
         return context.getBean(type);
     }
-    
+
     /**
      * Fetches spring beans. For cases when auto-wiring is not a possibility.
-     * 
+     *
      * @param <T>
      * @param type
      *            Class of the bean to fetch.
@@ -335,7 +333,7 @@ public class AppEntry extends com.vaadin.ui.UI {
 
     /**
      * Get main layout.
-     * 
+     *
      * @return Main layout.
      */
     public MenuLayout getMain() {
@@ -344,16 +342,16 @@ public class AppEntry extends com.vaadin.ui.UI {
 
     /**
      * Get refresh manager.
-     * 
+     *
      * @return Refresh manager.
      */
-    public RefreshManager getRefreshManager() {
-        return refreshManager;
-    }
+//    public RefreshManager getRefreshManager() {
+//        return refreshManager;
+//    }
 
     /**
      * Set URI fragment.
-     * 
+     *
      * @param uriFragment
      *            New URI fragment.
      * @param throwEvents

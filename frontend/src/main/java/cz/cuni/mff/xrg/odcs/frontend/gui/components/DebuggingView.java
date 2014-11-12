@@ -27,9 +27,7 @@ import cz.cuni.mff.xrg.odcs.commons.app.facade.LogFacade;
 import cz.cuni.mff.xrg.odcs.commons.app.facade.PipelineFacade;
 import cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecution;
 import cz.cuni.mff.xrg.odcs.commons.app.pipeline.PipelineExecutionStatus;
-import cz.cuni.mff.xrg.odcs.frontend.AppEntry;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.DecorationHelper;
-import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.RefreshManager;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.download.OnDemandFileDownloader;
 import cz.cuni.mff.xrg.odcs.frontend.auxiliaries.download.OnDemandStreamResource;
 import cz.cuni.mff.xrg.odcs.frontend.container.accessor.MessageRecordAccessor;
@@ -49,7 +47,7 @@ import cz.cuni.mff.xrg.odcs.frontend.gui.views.Utils;
  * filtered by level. Browse tab shows triples from graph which selected DPU
  * created. Query tab allows to query data from graphs which were created during
  * pipeline execution.
- * 
+ *
  * @author Petyr
  * @author Bogo
  */
@@ -57,7 +55,7 @@ public class DebuggingView extends CustomComponent {
 
     private static final Logger LOG = LoggerFactory.getLogger(DebuggingView.class);
 
-	private static final int ICON_HEIGHT = 16; // [pixels]
+    private static final int ICON_HEIGHT = 16; // [pixels]
 
     private VerticalLayout mainLayout;
 
@@ -124,7 +122,7 @@ public class DebuggingView extends CustomComponent {
 
     /**
      * Initialize the debugging view.
-     * 
+     *
      * @param exec
      *            Execution to show.
      * @param dpu
@@ -155,14 +153,14 @@ public class DebuggingView extends CustomComponent {
             LOG.debug("Created new Log and Record table");
         }
 
-        // building require some thing to be set 
+        // building require some thing to be set
         this.pipelineExec = exec;
 
-        // build gui layout 
+        // build gui layout
         buildMainLayout();
         setCompositionRoot(mainLayout);
 
-        // set 
+        // set
         setExecution(exec, dpu, false);
 
         isInitialized = true;
@@ -172,7 +170,7 @@ public class DebuggingView extends CustomComponent {
 
     /**
      * Is debugging view initialized.
-     * 
+     *
      * @return If debugging view is initialized
      */
     public boolean isInitialized() {
@@ -280,14 +278,14 @@ public class DebuggingView extends CustomComponent {
     /**
      * Fills DebuggingView with data, obtained from objects passed in
      * constructor.
-     * 
+     *
      * @param doRefresh
      *            If true then the refresh is done
      */
     public void fillContent(boolean doRefresh) {
 
         if (isFromCanvas) {
-            // update execution icon .. 
+            // update execution icon ..
             ThemeResource icon = DecorationHelper.getIconForExecutionStatus(pipelineExec.getStatus());
             iconStatus.setSource(icon);
             iconStatus.setDescription(pipelineExec.getStatus().name());
@@ -295,7 +293,7 @@ public class DebuggingView extends CustomComponent {
 
         if (doRefresh) {
             LOG.debug("Tables refresh start");
-            // refresh data .. 
+            // refresh data ..
             logSource.invalidate();
             msgSource.invalidate();
             // refresh tables
@@ -314,7 +312,7 @@ public class DebuggingView extends CustomComponent {
             queryTab.setEnabled(false);
         }
 
-        // hide the refresh automaticaly check box if the pipeline 
+        // hide the refresh automaticaly check box if the pipeline
         // execution is finished
         refreshAutomatically.setVisible(!isRunFinished());
     }
@@ -323,7 +321,7 @@ public class DebuggingView extends CustomComponent {
      * Refresh content for current data.
      */
     public void refresh() {
-        // refresh out pipeline execution .. 
+        // refresh out pipeline execution ..
         pipelineExec = pipelineFacade.getExecution(pipelineExec.getId());
         // refresh the content
         fillContent(true);
@@ -331,7 +329,7 @@ public class DebuggingView extends CustomComponent {
 
     /**
      * Sets execution and debug node about which debug info should be shown.
-     * 
+     *
      * @param execution
      *            New execution.
      * @param instance
@@ -370,32 +368,32 @@ public class DebuggingView extends CustomComponent {
         // as they have already been refresh by setting the executions
         fillContent(false);
 
-        if (!isRunFinished()) {
-            // add us to the refresh manager, so we got some refresh events
-            ((AppEntry) UI.getCurrent()).getRefreshManager().addListener(
-                    RefreshManager.DEBUGGINGVIEW,
-                    RefreshManager.getDebugRefresher(this, execution, pipelineFacade));
-        }
+//        if (!isRunFinished()) {
+//            // add us to the refresh manager, so we got some refresh events
+//            ((AppEntry) UI.getCurrent()).getRefreshManager().addListener(
+//                    RefreshManager.DEBUGGINGVIEW,
+//                    RefreshManager.getDebugRefresher(this, execution, pipelineFacade));
+//        }
         LOG.debug("setExecution({}) -> done", execution.getId());
     }
-    
+
     public void restore() {
-    	if (pipelineExec == null) {
-			return;
-		}
-    	if (!isRunFinished()) {
-            // add us to the refresh manager, so we got some refresh events
-            ((AppEntry) UI.getCurrent()).getRefreshManager().addListener(
-                    RefreshManager.DEBUGGINGVIEW,
-                    RefreshManager.getDebugRefresher(this, pipelineExec, pipelineFacade));
-        } else {
-        	refresh();
+        if (pipelineExec == null) {
+            return;
         }
+//        if (!isRunFinished()) {
+//            // add us to the refresh manager, so we got some refresh events
+//            ((AppEntry) UI.getCurrent()).getRefreshManager().addListener(
+//                    RefreshManager.DEBUGGINGVIEW,
+//                    RefreshManager.getDebugRefresher(this, pipelineExec, pipelineFacade));
+//        } else {
+        refresh();
+//        }
     }
 
     /**
      * Returns whether given execution is finished.
-     * 
+     *
      * @return True is the execution is finished.
      */
     public boolean isRunFinished() {
@@ -406,7 +404,7 @@ public class DebuggingView extends CustomComponent {
 
     /**
      * Return true if the content is automatically refreshed.
-     * 
+     *
      * @return true if the content is automatically refreshed
      */
     public boolean isRefreshingAutomatically() {
@@ -415,12 +413,12 @@ public class DebuggingView extends CustomComponent {
 
     /**
      * Resizes log area after window with DebuggingView was resized.
-     * 
+     *
      * @param height
      *            New height of log text area.
      */
     public void resize(float height) {
-        // TODO Resize the content here .. 
+        // TODO Resize the content here ..
     }
 
     /**
@@ -435,7 +433,7 @@ public class DebuggingView extends CustomComponent {
 
     /**
      * Selects tab by name.
-     * 
+     *
      * @param tabName
      */
     public void setActiveTab(String tabName) {
