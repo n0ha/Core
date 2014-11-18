@@ -150,7 +150,7 @@ class OSGIModuleFacadeConfig {
         String list = "";
         String delimiter = ",";
         try {
-            list = StringUtils.join(IOUtils.readLines(resource.getInputStream()), ",").replaceAll("-SNAPSHOT", ".SNAPSHOT");
+            list = StringUtils.join(IOUtils.readLines(resource.getInputStream()), ",").replaceAll("-UK-SNAPSHOT", ".SNAPSHOT").replaceAll("-SNAPSHOT", ".SNAPSHOT");
             LOG.debug("list of package to expose: ", list);
         } catch (IOException e) {
             LOG.error("Error", e);
