@@ -1,10 +1,14 @@
-package org.eclipse.persistence;
+package cz.cuni.mff.xrg.odcs.commons.app;
 
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Writer;
 import org.eclipse.persistence.config.SessionCustomizer;
 import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.tools.profiler.PerformanceProfiler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -12,11 +16,39 @@ import org.eclipse.persistence.tools.profiler.PerformanceProfiler;
  */
 public class PerformanceSessionCustomizer implements SessionCustomizer {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PerformanceSessionCustomizer.class);
+
+    public static class LogWriter extends Writer {
+
+        @Override
+        public void write(String str) throws IOException {
+            // This method is used by PerformanceProfiler to log data.
+            LOG.debug(str);
+        }
+
+        @Override
+        public void write(char[] cbuf, int off, int len) throws IOException {
+            // not used
+        }
+
+        @Override
+        public void flush() throws IOException {
+            // no-op
+        }
+
+        @Override
+        public void close() throws IOException {
+            // no-op
+        }
+
+    }
+
     @Override
     public void customize(Session session) throws Exception {
         // Set writer for logs - times are in nano seconds!! (10^-9)
-        if (System.getProperty("eclipse-link.log") != null) {
-            session.setLog(new OutputStreamWriter(new FileOutputStream(System.getProperty("eclipse-link.log"))));
+        if (System.getProperty("eclipseLink.log") != null) {
+            //session.setLog(new OutputStreamWriter(new FileOutputStream(System.getProperty("eclipse-link.log"))));
+            session.setLog(new LogWriter());
 
             // https://docs.oracle.com/middleware/1212/toplink/TLADG/performance.htm#TLADG446
             // http://wiki.eclipse.org/EclipseLink/UserGuide/JPA/Advanced_JPA_Development/Performance/Performance_Monitoring_and_Profiling/Performance_Profiling
