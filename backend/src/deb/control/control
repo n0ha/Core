@@ -1,0 +1,8 @@
+Package: odn-unifiedview
+Version: 1.4.1
+Section: java
+Priority: extra
+Architecture: all
+Maintainer: jmc@eea.sk
+Depends: java7-runtime-headless | java7-runtime, mysql-server
+Description: The tool uses data processing pipelines for obtaining, processing, and storing RDF data.

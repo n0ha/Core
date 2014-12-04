@@ -1,0 +1,67 @@
+#!/bin/sh
+. /usr/share/debconf/confmodule
+
+
+db_up() { 
+   db_get backend/mysql_root
+   ROOT_PW=$RET
+   #TODO
+   # check if db is installed
+}
+
+db_configure() {
+    #TODO 
+    # add user and add schema and data
+    echo "create database if not exists unifiedviews;" | mysql --password=$ROOT_PW
+    echo "drop user $DBA_USER;" | mysql --password=$ROOT_PW || true
+    echo "create user $DBA_USER identified by '$DBA_PASS';" | mysql --password=$ROOT_PW
+    echo "grant ALL on unifiedviews.* to $DBA_USER;" | mysql --password=$ROOT_PW
+    mysql -u $DBA_USER --password=$DBA_PASS unifiedviews < \
+    /usr/share/unifiedviews/mysql/schema.sql >> /var/log/unifiedviews/sql-install.log 2>&1
+    mysql -u $DBA_USER --password=$DBA_PASS unifiedviews < \
+    /usr/share/unifiedviews/mysql/data.sql >> /var/log/unifiedviews/sql-install.log 2>&1
+    mysql -u $DBA_USER --password=$DBA_PASS unifiedviews < \
+    /usr/share/unifiedviews/mysql/core-plugin.sql >> /var/log/unifiedviews/sql-instal.log 2>&1
+    #update backend config
+    sed --in-place \
+    -e "s/database.sql.hostname = .*/database.sql.hostname = $address_host/" \
+    -e "s/database.sql.port = .*/database.sql.port = 3306/" \
+    -e "s/database.sql.user = .*/database.sql.user = $DBA_USER/" \
+    -e "s/database.sql.password = .*/database.sql.password = $DBA_PASS/" \
+    -e "s/database.rdf.hostname = .*/database.rdf.hostname = $address_host/" \
+    -e "s/database.rdf.port = .*/database.rdf.port = $address_port/" \
+    -e "s/database.rdf.user = .*/database.rdf.user = $username/" \
+    -e "s/database.rdf.password = .*/database.rdf.password = $password/" \
+    /etc/unifiedviews/backend-config.properties
+}
+
+service_backend_start() {
+    if [ -x "`which invoke-rc.d 2>/dev/null`" ]; then
+        invoke-rc.d unifiedviews-backend start || true
+    else
+        /etc/init.d/unifiedviews-backend start || true
+    fi
+
+    ;;
+}
+
+case "$1" in
+  configure)
+    db_up
+    db_configure
+    service_backend_start
+
+
+
+
+    
+  ;;
+
+  abort-upgrade|abort-remove|abort-deconfigure)
+  ;;
+
+  *)
+    echo "$0 called with unknown argument \`$1'" >&2
+    exit 1
+  ;;
+esac
