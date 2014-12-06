@@ -1,6 +1,7 @@
 package cz.cuni.mff.xrg.odcs.frontend;
 
 import java.io.IOException;
+import java.util.Date;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -75,8 +76,14 @@ public class ODCSApplicationServlet extends SpringVaadinServlet {
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
 
+        final Date start = new Date();
+        LOG.debug("service-start for: '{}' ", request.getQueryString());
+
         // Do the business.
         super.service(request, response);
+
+        final Date end = new Date();
+        LOG.debug("service-done for: '{}' in {} ms", request.getQueryString(), end.getTime() - start.getTime());
 
         // We remove the request from the thread local, there's no reason
         // to keep it once the work is done. Next request might be serviced

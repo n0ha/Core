@@ -4,6 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.persistence.config.SessionCustomizer;
 import org.eclipse.persistence.sessions.Session;
 import org.eclipse.persistence.tools.profiler.PerformanceProfiler;
@@ -23,7 +25,10 @@ public class PerformanceSessionCustomizer implements SessionCustomizer {
         @Override
         public void write(String str) throws IOException {
             // This method is used by PerformanceProfiler to log data.
-            LOG.debug(str);
+            if (StringUtils.isNotBlank(str)) {
+                str = str.replaceAll("\\r|\\n", "");
+                LOG.debug(str);
+            }
         }
 
         @Override
@@ -46,8 +51,8 @@ public class PerformanceSessionCustomizer implements SessionCustomizer {
     @Override
     public void customize(Session session) throws Exception {
         // Set writer for logs - times are in nano seconds!! (10^-9)
+
         if (System.getProperty("eclipseLink.log") != null) {
-            //session.setLog(new OutputStreamWriter(new FileOutputStream(System.getProperty("eclipse-link.log"))));
             session.setLog(new LogWriter());
 
             // https://docs.oracle.com/middleware/1212/toplink/TLADG/performance.htm#TLADG446
