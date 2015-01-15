@@ -1,0 +1,2 @@
+#!/bin/bash
+aptly snapshot list  -config=/home/aptly/.aptly.conf |  grep "odn-jenkins-testing-[0-9]*" -o | xargs -I{} aptly snapshot  -config=/home/aptly/.aptly.conf drop {}  >> /var/log/clear_snapshots.log
